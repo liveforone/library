@@ -47,8 +47,12 @@ public class SecurityConfig {
                                 "/member/signup",
                                 "/member/login"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.GET,
-                                "/admin").hasRole("ADMIN")
+                        .requestMatchers(
+                                "/admin",
+                                "/book/post",
+                                "/book/edit/**",
+                                "/book/delete/**"
+                        ).hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .logout()

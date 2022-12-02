@@ -23,6 +23,9 @@ public class Book {
     private String title;
 
     @Column(nullable = false)
+    private String writer;
+
+    @Column(nullable = false)
     private int count;  //재고 수량
 
     @Column(columnDefinition = "integer default 0")
@@ -33,12 +36,14 @@ public class Book {
             Long id,
             String bookCode,
             String title,
+            String writer,
             int count,
             int borrowCount
     ) {
         this.id = id;
         this.bookCode = bookCode;
         this.title = title;
+        this.writer = writer;
         this.count = count;
         this.borrowCount = borrowCount;
     }
