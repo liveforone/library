@@ -6,6 +6,7 @@ import librarysolution.library.member.dto.MemberResponse;
 import librarysolution.library.member.model.Member;
 import librarysolution.library.member.model.Role;
 import librarysolution.library.member.repository.MemberRepository;
+import librarysolution.library.utility.CommonUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,10 +32,10 @@ public class MemberService implements UserDetailsService {
 
     private final MemberRepository memberRepository;
 
-    public static final int DUPLICATE = 0;
-    public static final int NOT_DUPLICATE = 1;
-    public static final int PASSWORD_MATCH = 1;
-    public static final int PASSWORD_NOT_MATCH = 0;
+    private static final int DUPLICATE = 0;
+    private static final int NOT_DUPLICATE = 1;
+    private static final int PASSWORD_MATCH = 1;
+    private static final int PASSWORD_NOT_MATCH = 0;
 
     //== UserResponse builder method ==//
     public MemberResponse dtoBuilder(Member member) {
@@ -59,7 +60,7 @@ public class MemberService implements UserDetailsService {
     //== entity -> dto1 - detail ==//
     public MemberResponse entityToDtoDetail(Member member) {
 
-        if (member == null) {
+        if (CommonUtils.isNull(member)) {
             return null;
         }
         return dtoBuilder(member);
@@ -85,7 +86,7 @@ public class MemberService implements UserDetailsService {
     public int checkDuplicateEmail(String email) {
         Member member = memberRepository.findByEmail(email);
 
-        if (member == null) {
+        if (CommonUtils.isNull(member)) {
             return NOT_DUPLICATE;
         }
         return DUPLICATE;
@@ -95,7 +96,7 @@ public class MemberService implements UserDetailsService {
     public int checkDuplicateNickname(String nickname) {
         Member member = memberRepository.findByNickname(nickname);
 
-        if (member == null) {
+        if (CommonUtils.isNull(member)) {
             return NOT_DUPLICATE;
         }
         return DUPLICATE;
@@ -176,7 +177,6 @@ public class MemberService implements UserDetailsService {
     public void login(MemberRequest memberRequest, HttpSession httpSession)
             throws UsernameNotFoundException
     {
-
         String email = memberRequest.getEmail();
         String password = memberRequest.getPassword();
         Member member = memberRepository.findByEmail(email);
@@ -198,7 +198,9 @@ public class MemberService implements UserDetailsService {
         if (member.getAuth() != Role.ADMIN && ("admin@library.com").equals(email)) {
             authorities.add(new SimpleGrantedAuthority(Role.ADMIN.getValue()));
             memberRepository.updateAuth(Role.ADMIN, memberRequest.getEmail());
-        } else if (member.getAuth() == Role.ADMIN) {
+        }
+
+        if (member.getAuth() == Role.ADMIN) {
             authorities.add(new SimpleGrantedAuthority(Role.ADMIN.getValue()));
         }
         authorities.add(new SimpleGrantedAuthority(Role.MEMBER.getValue()));

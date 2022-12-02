@@ -8,6 +8,7 @@ import librarysolution.library.member.dto.MemberResponse;
 import librarysolution.library.member.model.Member;
 import librarysolution.library.member.model.Role;
 import librarysolution.library.member.service.MemberService;
+import librarysolution.library.utility.CommonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -26,8 +27,8 @@ public class MemberController {
 
     private final MemberService memberService;
 
-    public static final int NOT_DUPLICATE = 1;
-    public static final int PASSWORD_MATCH = 1;
+    private static final int NOT_DUPLICATE = 1;
+    private static final int PASSWORD_MATCH = 1;
 
     //== 메인 페이지 ==//
     @GetMapping("/")
@@ -77,7 +78,7 @@ public class MemberController {
     ) {
         Member member = memberService.getMemberEntity(memberRequest.getEmail());
 
-        if (member == null) {
+        if (CommonUtils.isNull(member)) {
             return ResponseEntity.ok("해당 이메일의 회원은 존재하지 않습니다.");
         }
 
@@ -134,6 +135,10 @@ public class MemberController {
     ) {
         List<MemberResponse> memberList = memberService.getSearchByEmail(email);
 
+        if (CommonUtils.isNull(memberList)) {
+            return ResponseEntity.ok("해당 이메일의 회원이 존재하지 않습니다.");
+        }
+
         return ResponseEntity.ok(memberList);
     }
 
@@ -142,6 +147,10 @@ public class MemberController {
             @RequestParam("nickname") String nickname
     ) {
         List<MemberResponse> memberList = memberService.getSearchByNickname(nickname);
+
+        if (CommonUtils.isNull(memberList)) {
+            return ResponseEntity.ok("해당 이름의 회원이 존재하지 않습니다.");
+        }
 
         return ResponseEntity.ok(memberList);
     }
@@ -201,11 +210,11 @@ public class MemberController {
         Member member = memberService.getMemberEntity(principal.getName());
         MemberResponse changeEmail = memberService.getMemberByEmail(request.getEmail());
 
-        if (member == null) {
+        if (CommonUtils.isNull(member)) {
             return ResponseEntity.ok("해당 유저를 조회할 수 없어 이메일 변경이 불가능합니다.");
         }
 
-        if (changeEmail != null) {  //이메일 중복 check
+        if (!CommonUtils.isNull(changeEmail)) {  //이메일 중복 check
             return ResponseEntity.ok("해당 이메일이 이미 존재합니다. 다시 입력해주세요");
         }
 
@@ -244,7 +253,7 @@ public class MemberController {
     ) {
         Member member = memberService.getMemberEntity(principal.getName());
 
-        if (member == null) {
+        if (CommonUtils.isNull(member)) {
             return ResponseEntity
                     .ok("해당 유저를 조회할 수 없어 비밀번호 변경이 불가능합니다.");
         }
@@ -284,7 +293,7 @@ public class MemberController {
     ) {
         Member member = memberService.getMemberEntity(principal.getName());
 
-        if (member == null) {
+        if (CommonUtils.isNull(member)) {
             return ResponseEntity.ok("해당 유저를 조회할 수 없어 탈퇴가 불가능합니다.");
         }
 
