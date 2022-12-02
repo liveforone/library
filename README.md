@@ -100,6 +100,7 @@ spring:
 * 이에따라 매번 null을 분기처리하는 코드가 반복됬고, 이를 optional처럼 함수화 하여 처리해보자는 생각이 들었다.
 * CommonUtils 라는 클래스를 선언하고 isNull()이라는 함수를 만들었다.
 * 이 함수는 list와 문자열, 객체(일반적으로 엔티티)의 null을 체크한다.
+* [정리한 글](https://github.com/liveforone/study/blob/main/GoodCode/%EA%B0%9D%EC%B2%B4%20null%EC%B2%B4%ED%81%AC%EC%99%80%20%EC%A4%91%EB%B3%B5%EC%B2%B4%ED%81%AC.md)
 * 아래는 코드이다.
 ```
 public static boolean isNull(Object obj) {
@@ -125,6 +126,7 @@ public static boolean isNull(Object obj) {
 ## HttpHeaders 생성 함수
 * 매번 컨트롤러에서 리다이렉트를 할때마다 HttpHeaders를 직접 생성 하는것이 반복되고 귀찮았다.
 * 이 또한 CommonUtils에 makeHeader() 라는 함수를 만들어서 사용하는 것으로 해결하였다.
+* [정리한 글](https://github.com/liveforone/study/blob/main/GoodCode/HttpHeaders%20%EC%83%9D%EC%84%B1%20%ED%95%A8%EC%88%98.md)
 * 아래는 코드이다.
 ```
 public static HttpHeaders makeHeader(String uri) {
