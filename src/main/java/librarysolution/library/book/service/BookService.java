@@ -102,4 +102,9 @@ public class BookService {
     public void deleteBook(Long id) {
         bookRepository.deleteById(id);
     }
+
+    @Transactional
+    public void updateBorrowCount(Long id) {
+        bookRepository.updateBorrowCount(id);
+    }
 }
