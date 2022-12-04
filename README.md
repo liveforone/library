@@ -70,6 +70,14 @@
 /book/edit/{id} - get/post
 /book/delete/{id} - post
 ```
+### borrow
+```
+/borrow/by-name/{name} - get
+/borrow/book-id/{bookId} - get
+/borrow/{id}
+/borrow/post/{bookId}
+/borrow/return/{id} - post
+```
 ## 연관관계
 ```
 borrow ->  book, member (manyToOne) 단방향
