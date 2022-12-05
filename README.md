@@ -180,3 +180,6 @@ HttpHeaders httpHeaders = CommonUtils.makeHeader(url);
 * 하지만 이미 Session이 종료된 상태이기 때문에 LazyInitializationException 예외가 발생하게 되는 것이다.
 * EAGER 로 바꾸면 해결이 되지만 더 좋은것은 fetch join이다.
 * 페치조인으로 해결했다.(jpql 작성이 귀찮아도 꼭 페치조인은 사용하자. 여러모로 좋다.)
+
+# 7. 새롭게 적용한점
+* jwt를 이용해 회원가입, 로그인 진행함.
