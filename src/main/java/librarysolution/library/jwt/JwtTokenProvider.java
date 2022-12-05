@@ -12,7 +12,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.SecretKey;
+import java.security.Key;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @Component
 public class JwtTokenProvider {
 
-    private final SecretKey key;
+    private final Key key;
 
     public JwtTokenProvider(@Value("${jwt.secret}") String secretKey) {
         byte[] keyBytes = Base64.getDecoder().decode(secretKey);
@@ -40,7 +40,7 @@ public class JwtTokenProvider {
 
         long now = (new Date()).getTime();
         // Access Token 생성
-        Date accessTokenExpiresIn = new Date(now + 86400000);
+        Date accessTokenExpiresIn = new Date(now + 1800000);
         String accessToken = Jwts.builder()
                 .setSubject(authentication.getName())
                 .claim("auth", authorities)
@@ -50,7 +50,7 @@ public class JwtTokenProvider {
 
         // Refresh Token 생성
         String refreshToken = Jwts.builder()
-                .setExpiration(new Date(now + 86400000))
+                .setExpiration(new Date(now + 1800000))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 

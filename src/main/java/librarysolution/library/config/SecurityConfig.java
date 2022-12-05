@@ -54,7 +54,6 @@ public class SecurityConfig {
                 .logout()
                 .logoutRequestMatcher(new AntPathRequestMatcher("/member/logout"))
                 .logoutSuccessUrl("/")
-                .invalidateHttpSession(true)
                 .and()
                 // 403 예외처리 핸들링
                 .exceptionHandling()
