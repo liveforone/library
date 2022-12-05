@@ -1,36 +1,36 @@
 package librarysolution.library.member.service;
 
-import jakarta.servlet.http.HttpSession;
+import librarysolution.library.jwt.JwtTokenProvider;
+import librarysolution.library.jwt.TokenInfo;
 import librarysolution.library.member.dto.MemberRequest;
 import librarysolution.library.member.dto.MemberResponse;
 import librarysolution.library.member.model.Member;
 import librarysolution.library.member.model.Role;
 import librarysolution.library.member.repository.MemberRepository;
 import librarysolution.library.utility.CommonUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class MemberService implements UserDetailsService {
+@Slf4j
+public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final AuthenticationManagerBuilder authenticationManagerBuilder;
+    private final JwtTokenProvider jwtTokenProvider;
 
     private static final int DUPLICATE = 0;
     private static final int NOT_DUPLICATE = 1;
@@ -112,25 +112,6 @@ public class MemberService implements UserDetailsService {
         return PASSWORD_NOT_MATCH;
     }
 
-    //== spring context 반환 메소드(필수) ==//
-    @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Member member = memberRepository.findByEmail(email);
-
-        List<GrantedAuthority> authorities = new ArrayList<>();
-
-        if (member.getAuth() == Role.ADMIN) {  //어드민 아이디 지정됨, 비밀번호는 회원가입해야함
-            authorities.add(new SimpleGrantedAuthority(Role.ADMIN.getValue()));
-        }
-        authorities.add(new SimpleGrantedAuthority(Role.MEMBER.getValue()));
-
-        return new User(
-                member.getEmail(),
-                member.getPassword(),
-                authorities
-        );
-    }
-
     public Member getMemberEntity(String email) {
         return memberRepository.findByEmail(email);
     }
@@ -164,7 +145,12 @@ public class MemberService implements UserDetailsService {
         //비밀번호 암호화
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         memberRequest.setPassword(passwordEncoder.encode(memberRequest.getPassword()));
-        memberRequest.setAuth(Role.MEMBER);  //기본 권한 매핑
+
+        if (Objects.equals(memberRequest.getEmail(), "admin@library.com")) {
+            memberRequest.setAuth(Role.ADMIN);
+        } else {
+            memberRequest.setAuth(Role.MEMBER);
+        }
         memberRequest.setNickname(makeRandomNickname());  //무작위 닉네임 생성
 
         memberRepository.save(
@@ -174,42 +160,20 @@ public class MemberService implements UserDetailsService {
 
     //== 로그인 - 세션과 컨텍스트홀더 사용 ==//
     @Transactional
-    public void login(MemberRequest memberRequest, HttpSession httpSession)
-            throws UsernameNotFoundException
-    {
+    public TokenInfo login(MemberRequest memberRequest) {
+
         String email = memberRequest.getEmail();
         String password = memberRequest.getPassword();
-        Member member = memberRepository.findByEmail(email);
 
-        UsernamePasswordAuthenticationToken token =
-                new UsernamePasswordAuthenticationToken(email, password);
-        SecurityContextHolder.getContext().setAuthentication(token);
-        httpSession.setAttribute(
-                HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
-                SecurityContextHolder.getContext()
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                email,
+                password
         );
+        Authentication authentication = authenticationManagerBuilder
+                .getObject()
+                .authenticate(authenticationToken);
 
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        /*
-        처음 어드민이 로그인을 하는경우 이메일로 판별해서 권한을 admin 으로 변경해주고
-        그 다음부터 어드민이 업데이트 할때에는 auth 칼럼으로 판별해서 db 업데이트 하지않고,
-        GrantedAuthority 만 업데이트 해준다.
-         */
-        if (member.getAuth() != Role.ADMIN && ("admin@library.com").equals(email)) {
-            authorities.add(new SimpleGrantedAuthority(Role.ADMIN.getValue()));
-            memberRepository.updateAuth(Role.ADMIN, memberRequest.getEmail());
-        }
-
-        if (member.getAuth() == Role.ADMIN) {
-            authorities.add(new SimpleGrantedAuthority(Role.ADMIN.getValue()));
-        }
-        authorities.add(new SimpleGrantedAuthority(Role.MEMBER.getValue()));
-
-        new User(
-                member.getEmail(),
-                member.getPassword(),
-                authorities
-        );
+        return jwtTokenProvider.generateToken(authentication);
     }
 
     @Transactional

@@ -1,16 +1,17 @@
 package librarysolution.library.config;
 
-import librarysolution.library.member.service.MemberService;
+import librarysolution.library.jwt.JwtAuthenticationFilter;
+import librarysolution.library.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
@@ -18,7 +19,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final MemberService memberService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     //== bcrypt pw 인코더 ==//
     @Bean
@@ -26,22 +27,15 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    //== 권한 설정자 ==//
-    @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider auth = new DaoAuthenticationProvider();
-        auth.setUserDetailsService(memberService);
-        auth.setPasswordEncoder(passwordEncoder());
-        return auth;
-    }
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .formLogin().disable()
-                .csrf().disable()  //csrf 끔.
-                .authenticationProvider(authenticationProvider())  //provider 등록
-                .authorizeRequests((authorize) -> authorize
+                .httpBasic().disable()
+                .csrf().disable()
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(
                                 "/",
                                 "/member/signup",
@@ -54,6 +48,8 @@ public class SecurityConfig {
                                 "/book/delete/**"
                         ).hasRole("ADMIN")
                         .anyRequest().authenticated()
+                        .and()
+                        .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
                 )
                 .logout()
                 .logoutRequestMatcher(new AntPathRequestMatcher("/member/logout"))
@@ -61,7 +57,8 @@ public class SecurityConfig {
                 .invalidateHttpSession(true)
                 .and()
                 // 403 예외처리 핸들링
-                .exceptionHandling().accessDeniedPage("/member/prohibition");
+                .exceptionHandling()
+                .accessDeniedPage("/member/prohibition");
         return http.build();
     }
 }

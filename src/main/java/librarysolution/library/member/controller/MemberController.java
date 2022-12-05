@@ -1,6 +1,6 @@
 package librarysolution.library.member.controller;
 
-import jakarta.servlet.http.HttpSession;
+import librarysolution.library.jwt.TokenInfo;
 import librarysolution.library.member.dto.ChangeEmailRequest;
 import librarysolution.library.member.dto.ChangePasswordRequest;
 import librarysolution.library.member.dto.MemberRequest;
@@ -16,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
 import java.security.Principal;
 import java.util.List;
 
@@ -72,38 +71,13 @@ public class MemberController {
 
     //== 로그인 ==//
     @PostMapping("/member/login")
-    public ResponseEntity<?> loginPage(
-            @RequestBody MemberRequest memberRequest,
-            HttpSession session
+    public TokenInfo loginPage(
+            @RequestBody MemberRequest memberRequest
     ) {
-        Member member = memberService.getMemberEntity(memberRequest.getEmail());
-
-        if (CommonUtils.isNull(member)) {
-            return ResponseEntity.ok("해당 이메일의 회원은 존재하지 않습니다.");
-        }
-
-        int checkPassword = memberService.checkPasswordMatching(
-                memberRequest.getPassword(),
-                member.getPassword()
-        );
-
-        if (checkPassword != PASSWORD_MATCH) {
-            return ResponseEntity.ok("비밀번호가 일치하지 않습니다.");
-        }
-
-        String url = "/member/my-page";
-        HttpHeaders httpHeaders = CommonUtils.makeHeader(url);
-
-        memberService.login(
-                memberRequest,
-                session
-        );
+        TokenInfo tokenInfo = memberService.login(memberRequest);
         log.info("로그인 성공!");
 
-        return ResponseEntity
-                .status(HttpStatus.MOVED_PERMANENTLY)
-                .headers(httpHeaders)
-                .build();
+        return tokenInfo;
     }
 
     /*
@@ -116,8 +90,7 @@ public class MemberController {
     @GetMapping("/member/prohibition")
     public ResponseEntity<?> prohibition() {
         return ResponseEntity
-                .status(HttpStatus.FORBIDDEN)
-                .body("접근 권한이 없습니다.");
+                .ok("접근 권한이 없습니다.");
     }
 
     @GetMapping("/member/my-page")
