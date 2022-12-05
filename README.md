@@ -182,4 +182,4 @@ HttpHeaders httpHeaders = CommonUtils.makeHeader(url);
 * 페치조인으로 해결했다.(jpql 작성이 귀찮아도 꼭 페치조인은 사용하자. 여러모로 좋다.)
 
 # 7. 새롭게 적용한점
-* jwt를 이용해 회원가입, 로그인 진행함.
+* [jwt로 회원가입 로그인 적용](https://github.com/liveforone/jwt-example)
