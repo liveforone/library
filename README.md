@@ -183,3 +183,4 @@ HttpHeaders httpHeaders = CommonUtils.makeHeader(url);
 
 # 7. 새롭게 적용한점
 * [jwt로 회원가입 로그인 적용](https://github.com/liveforone/jwt-example)
+* 향상된 for-each문을 람다 for-each문으로 변경하여 가독성 향상시킴.
