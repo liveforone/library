@@ -18,9 +18,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -68,13 +68,10 @@ public class MemberService {
 
     //== entity -> dto2 - list ==//
     public List<MemberResponse> entityToDtoList(List<Member> memberList) {
-        List<MemberResponse> dtoList = new ArrayList<>();
-
-        for (Member member : memberList) {
-            dtoList.add(dtoBuilder(member));
-        }
-
-        return dtoList;
+        return memberList
+                .stream()
+                .map(this::dtoBuilder)
+                .collect(Collectors.toList());
     }
 
     //== 무작위 닉네임 생성 - 숫자 + 문자 ==//
@@ -136,7 +133,9 @@ public class MemberService {
 
     //== 이름으로 회원 검색 ==//
     public List<MemberResponse> getSearchByNickname(String nickname) {
-        return entityToDtoList(memberRepository.searchByNickName(nickname));
+        return entityToDtoList(
+                memberRepository.searchByNickName(nickname)
+        );
     }
 
     //== 회원 가입 로직 ==//

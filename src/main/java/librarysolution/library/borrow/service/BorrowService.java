@@ -14,8 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,15 +39,10 @@ public class BorrowService {
 
     //== entity ->  dto 편의메소드1 - 리스트 형식 ==//
     public List<BorrowResponse> entityToDtoList(List<Borrow> borrowList) {
-        List<BorrowResponse> dtoList = new ArrayList<>();
-
-        for (Borrow borrow : borrowList) {
-            dtoList.add(
-                    dtoBuilder(borrow)
-            );
-        }
-
-        return dtoList;
+        return borrowList
+                .stream()
+                .map(this::dtoBuilder)
+                .collect(Collectors.toList());
     }
 
     //== entity ->  dto 편의메소드2 - detail 형식 ==//
