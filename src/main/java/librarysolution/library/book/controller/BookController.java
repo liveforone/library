@@ -87,28 +87,24 @@ public class BookController {
 
     @GetMapping("/book/{id}")
     public ResponseEntity<?> bookDetailPage(@PathVariable("id") Long id) {
-        Book book = bookService.getBookDetail(id);
+        BookResponse book = bookService.getBookResponse(id);
 
         if (CommonUtils.isNull(book)) {
             return ResponseEntity.ok("책이 없어 조회가 불가능합니다.");
         }
 
-        return ResponseEntity.ok(
-                bookService.entityToDtoDetail(book)
-        );
+        return ResponseEntity.ok(book);
     }
 
     @GetMapping("/book/edit/{id}")
     public ResponseEntity<?> bookEditPage(@PathVariable("id") Long id) {
-        Book book = bookService.getBookDetail(id);
+        BookResponse book = bookService.getBookResponse(id);
 
         if (CommonUtils.isNull(book)) {
             return ResponseEntity.ok("책이 없어서 수정이 불가능합니다.");
         }
 
-        return ResponseEntity.ok(
-                bookService.entityToDtoDetail(book)
-        );
+        return ResponseEntity.ok(book);
     }
 
     @PostMapping("/book/edit/{id}")

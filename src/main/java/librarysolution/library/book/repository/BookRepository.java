@@ -1,5 +1,6 @@
 package librarysolution.library.book.repository;
 
+import librarysolution.library.book.dto.BookResponse;
 import librarysolution.library.book.model.Book;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +13,11 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     @Query("select b from Book b where b.id = :id")
     Book findOneById(@Param("id") Long id);
+
+    @Query("select new librarysolution.library.book.dto.BookResponse" +
+            "(b.id, b.bookCode, b.title, b.writer, b.count, b.borrowCount)" +
+            " from Book b where b.id = :id")
+    BookResponse findOneDtoById(@Param("id") Long id);
 
     @Query("select b from Book b where b.title like %:title%")
     Page<Book> searchByTitle(@Param("title") String title, Pageable pageable);

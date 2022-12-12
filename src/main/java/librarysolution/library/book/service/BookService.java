@@ -4,7 +4,6 @@ import librarysolution.library.book.dto.BookRequest;
 import librarysolution.library.book.dto.BookResponse;
 import librarysolution.library.book.model.Book;
 import librarysolution.library.book.repository.BookRepository;
-import librarysolution.library.utility.CommonUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.data.domain.Page;
@@ -52,16 +51,12 @@ public class BookService {
         return bookList.map(this::dtoBuilder);
     }
 
-    //== entity -> dto 편의메소드2 - 엔티티 하나 ==//
-    public BookResponse entityToDtoDetail(Book book) {
-        if (CommonUtils.isNull(book)) {
-            return null;
-        }
-        return dtoBuilder(book);
-    }
-
     public Book getBookDetail(Long id) {
         return bookRepository.findOneById(id);
+    }
+
+    public BookResponse getBookResponse(Long id) {
+        return bookRepository.findOneDtoById(id);
     }
 
     public Page<BookResponse> getAllBook(Pageable pageable) {

@@ -1,10 +1,11 @@
 package librarysolution.library.book.dto;
 
+import lombok.AccessLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BookRequest {
 
     private Long id;

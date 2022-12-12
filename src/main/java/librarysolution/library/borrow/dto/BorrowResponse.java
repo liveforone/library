@@ -1,6 +1,7 @@
 package librarysolution.library.borrow.dto;
 
 import librarysolution.library.borrow.model.BorrowState;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,7 +9,9 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 
 @Data
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class BorrowResponse {
 
     private Long id;
@@ -16,19 +19,4 @@ public class BorrowResponse {
     private String book;
     private BorrowState borrowState;
     private LocalDate borrowDate;
-
-    @Builder
-    public BorrowResponse(
-            Long id,
-            String member,
-            String book,
-            BorrowState borrowState,
-            LocalDate borrowDate
-    ) {
-        this.id = id;
-        this.member = member;
-        this.book = book;
-        this.borrowState = borrowState;
-        this.borrowDate = borrowDate;
-    }
 }
